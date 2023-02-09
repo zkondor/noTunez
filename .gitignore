@@ -1,6 +1,9 @@
 ## Build generated
 build/
 DerivedData/
+Derived
+_autogen
+_artifacts
 
 ## Various settings
 *.pbxuser
@@ -17,6 +20,8 @@ xcuserdata/
 *.moved-aside
 *.xcuserstate
 .DS_Store
+*.xcodeproj
+*.xcworkspace
 
 ## Obj-C/Swift specific
 *.hmap
