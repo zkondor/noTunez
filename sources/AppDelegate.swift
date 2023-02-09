@@ -1,6 +1,8 @@
 //
 //  AppDelegate.swift
-//  noTunes
+//  noTunez
+//
+//  Updated by Andrew Sichevoi on Feb 2023.
 //
 //  Created by Tom Taylor on 04/01/2017.
 //  Copyright © 2017 Twisted Digital Ltd. All rights reserved.
@@ -8,6 +10,7 @@
 
 import Cocoa
 import ServiceManagement
+import LaunchAtLogin
 
 @NSApplicationMain
 class AppDelegate: NSObject, NSApplicationDelegate {
@@ -17,6 +20,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     let statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
 
     @IBOutlet weak var statusMenu: NSMenu!
+    @IBOutlet weak var launchAtLoginMenuItem: NSMenuItem!
 
     @IBAction func hideIconClicked(_ sender: NSMenuItem) {
         defaults.set(true, forKey: "hideIcon")
@@ -26,6 +30,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     @IBAction func quitClicked(_ sender: NSMenuItem) {
         NSApplication.shared.terminate(self)
+    }
+
+    @IBAction func launchAtLogin(_ sender: NSMenuItem) {
+        LaunchAtLogin.isEnabled.toggle()
+        self.updateLaunchAtLogin()
     }
 
     @objc func statusBarButtonClicked(sender: NSStatusBarButton) {
@@ -57,8 +66,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             NSStatusBar.system.removeStatusItem(statusItem)
         }
 
+        self.updateLaunchAtLogin()
         self.appIsLaunched()
         self.createListener()
+    }
+
+    func updateLaunchAtLogin() -> Void {
+        launchAtLoginMenuItem.state = LaunchAtLogin.isEnabled ? .on : .off
     }
 
     func createListener() {
@@ -115,5 +129,4 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let process = NSRunningApplication.init(processIdentifier: pid_t(processId))
         process?.forceTerminate()
     }
-
 }
