@@ -1,7 +1,9 @@
-ARTIFACTS_DIR=${PWD}/_artifacts
-AUTOGEN_DIR=_autogen
+ARTIFACTS_DIR="${PWD}/_artifacts"
+AUTOGEN_DIR="${PWD}/_autogen"
 PROJECT_DIR="${AUTOGEN_DIR}/noTunez.xcodeproj"
 SCHEME=noTunez
+APP_VERSION=$(shell grep MARKETING_VERSION config/target.xcconfig | cut -d= -f 2-)
+DIST_ZIP_FILENAME="noTunez_${APP_VERSION}.zip"
 
 .PHONY: gen
 gen:
@@ -32,7 +34,7 @@ dist:
 	xcodebuild archive -project "${PROJECT_DIR}" -scheme "${SCHEME}" -configuration Release -archivePath "${ARCHIVE_PATH}" -derivedDataPath "${ARTIFACTS_DIR}"
 	./export_options.plist.sh "${EXPORT_OPTS_PLIST}"
 	xcodebuild -exportArchive -archivePath "${ARCHIVE_PATH}" -exportPath "${PKG_PATH}" -exportOptionsPlist "${EXPORT_OPTS_PLIST}"
-	pushd "${PKG_PATH}" && zip -r "${ARTIFACTS_DIR}/${SCHEME}.zip" "${SCHEME}.app" && popd
+	pushd "${PKG_PATH}" && zip -r "${ARTIFACTS_DIR}/${DIST_ZIP_FILENAME}" "${SCHEME}.app" && popd
 
 .PHONY: notarize-dist
 notarize-dist: APPLE_ID ?= $(error APPLE_ID variable is not set, e.g.: foo@bar.com)
@@ -40,4 +42,4 @@ notarize-dist: KEYCHAIN_PROFILE ?= $(error KEYCHAIN_PROFILE is not set, e.g.: 'N
 notarize-dist: KEYCHAIN_PATH ?= $(error KEYCHAIN_PATH is not set, e.g.: '~/Library/Keychains/appledev.keychain-db')
 notarize-dist:
 	security unlock-keychain "${KEYCHAIN_PATH}"
-	xcrun notarytool submit --apple-id ${APPLE_ID} --keychain-profile "${KEYCHAIN_PROFILE}" --keychain "${KEYCHAIN_PATH}" --wait "${ARTIFACTS_DIR}/${SCHEME}.zip"
+	xcrun notarytool submit --apple-id ${APPLE_ID} --keychain-profile "${KEYCHAIN_PROFILE}" --keychain "${KEYCHAIN_PATH}" --wait "${ARTIFACTS_DIR}/${DIST_ZIP_FILENAME}"
