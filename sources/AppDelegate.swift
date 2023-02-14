@@ -19,6 +19,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     let statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
 
+    // TODO: to follow an active screen to show, we can create an instance using the *current* NSScreen
+    let osdNotification = makeOSDNotification(screen: NSScreen.main!)
+
     @IBOutlet weak var statusMenu: NSMenu!
     @IBOutlet weak var launchAtLoginMenuItem: NSMenuItem!
 
@@ -100,17 +103,19 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         if statusItem.image == NSImage(named: "StatusBarButtonImageActive") || defaults.bool(forKey: "hideIcon") {
             if let processName:String = note.userInfo?["NSApplicationBundleIdentifier"] as? String {
                 if let processId = note.userInfo?["NSApplicationProcessIdentifier"] as? Int {
-                    switch processName {
-                        case "com.apple.iTunes":
-                            self.terminateProcessWith(processId, processName)
-                            self.launchReplacement()
-                        case "com.apple.Music":
-                            self.terminateProcessWith(processId, processName)
-                            self.launchReplacement()
-                        default:break
-                    }
+                    handleLaunchedApp(processId, processName)
                 }
             }
+        }
+    }
+
+    func handleLaunchedApp(_ processId: Int, _ processName: String) -> Void {
+        switch processName {
+        case "com.apple.iTunes", "com.apple.Music":
+            self.terminateProcessWith(processId, processName)
+            self.launchReplacement()
+            self.showOSDNotification()
+        default:break
         }
     }
 
@@ -128,5 +133,17 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     func terminateProcessWith(_ processId:Int,_ processName:String) {
         let process = NSRunningApplication.init(processIdentifier: pid_t(processId))
         process?.forceTerminate()
+    }
+
+    func showOSDNotification() {
+        if !defaults.bool(forKey: "notificationOnHandle.enabled") {
+            return
+        }
+
+        let notificationInterval = max(defaults.double(forKey: "notificationOnHandle.showInterval"), 1.0)
+        osdNotification.show()
+        DispatchQueue.main.asyncAfter(deadline: .now() + notificationInterval) { [self] in
+            osdNotification.close()
+        }
     }
 }

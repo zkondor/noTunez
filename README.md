@@ -28,7 +28,7 @@ brew install --cask notunez
 
 ### Set `noTunez` to launch at startup
 
-Right click the menu bar icon to toggle `Launch at Login`. That's it.
+Right click the menu bar icon to toggle `Launch at Login`. That's all!
 
 ### Toggle `noTunez` Functionality
 
@@ -68,6 +68,20 @@ Quit the app via Activity Monitor or run the following command in Terminal:
 
 ```bash
 osascript -e 'quit app "noTunez"'
+```
+
+### Show a notification
+
+To show on screen notification that a launch `iTunes`/`Apple Music` was handled (prevented to run):
+
+``` bash
+defaults write xyz.kondor.noTunez notificationOnHandle.enabled 1
+```
+
+The notification is shown for 1 second. To increase the interval:
+
+``` bash
+defaults write xyz.kondor.noTunez notificationOnHandle.showInterval 3
 ```
 
 ### Set replacement for iTunes / Apple Music
